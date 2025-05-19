@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniStay - Student Hostel Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+            --secondary-blue: #1e40af;
+            --accent-blue: #3b82f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            max-width: 100%;
+            overflow-x: hidden;
+            background-color: #f8fafc;
+        }
+
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            position: relative;
+            min-height: 100vh;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .status-bar {
+            height: 24px;
+            background-color: var(--primary-blue);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .bottom-nav a.active {
+            color: var(--accent-blue);
+        }
+
+        .bottom-nav a.active i {
+            color: var(--accent-blue);
+        }
+
+        .hostel-card {
+            transition: transform 0.2s;
+        }
+
+        .hostel-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--accent-blue);
+        }
+
+        .university-badge {
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .amenity-badge {
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+
+        .featured-swiper {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+        }
+
+        .featured-swiper-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .testimonial-swiper {
+            width: 100%;
+        }
+
+        .testimonial-swiper-slide {
+            padding: 1rem;
+        }
+
+        .swiper-pagination-bullet-active {
+            background-color: var(--primary-blue) !important;
+        }
+
+        .price-tag {
+            background-color: rgba(37, 99, 235, 0.9);
+        }
+
+        .backdrop-blur {
+            backdrop-filter: blur(8px);
+        }
+
+        /* Profile-specific styles */
+        .profile-header {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .tab-active {
+            border-bottom: 3px solid var(--primary-blue);
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        /* Dark mode toggle styles */
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: var(--primary-blue);
+        }
+
+        .toggle-checkbox:checked + .toggle-label:after {
+            transform: translateX(100%);
+        }
+
+        .dark {
+            background-color: #1f2937;
+            color: #f9fafb;
+        }
+
+        .dark .app-container {
+            background: #374151;
+        }
+
+        .dark .bg-white {
+            background: #4b5563;
+        }
+
+        .dark .text-gray-700 {
+            color: #d1d5db;
+        }
+
+        .dark .text-gray-500 {
+            color: #9ca3af;
+        }
+
+        .dark .bg-blue-50 {
+            background: #1e3a8a;
+        }
+
+        .dark .text-blue-600 {
+            color: #60a5fa;
+        }
+
+        /* Preference Modal Styles */
+        .preference-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .preference-content {
+            background-color: white;
+            width: 100%;
+            max-width: 414px;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+        }
+
+        .preference-content.active {
+            transform: translateY(0);
+        }
+
+        .preference-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .preference-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preference-title-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: rgba(37, 99, 235, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preference-hostels {
+            padding: 16px;
+        }
+
+        .preference-hostel-count {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        /* Dark mode for preference modal */
+        .dark .preference-content {
+            background: #4b5563;
+        }
+
+        .dark .preference-header {
+            background: #4b5563;
+            border-bottom: 1px solid #6b7280;
+        }
+
+        .dark .preference-hostel-count {
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="app-container">
+        <div class="status-bar flex items-center justify-between px-4 text-white text-xs">
+            <span>9:41</span>
+            <div class="flex space-x-2">
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-three-quarters"></i>
+            </div>
+        </div>
+
+        <header class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-home text-2xl"></i>
+                    <h1 class="text-xl font-bold">CAMPUS CRIBS</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="notificationsBtn" class="p-1 rounded-full bg-blue-500">
+                        <i class="fas fa-bell text-white"></i>
+                    </button>
+                    <button id="profileBtn" class="p-1 rounded-full bg-blue-500">
+                        <i class="fas fa-user text-white"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="pb-16" id="mainContent">
+            <!-- Main Content Section -->
+            <section id="mainContentSection">
+                <section class="px-4 pt-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Search hostels by university or location..."
+                               class="w-full p-3 pl-10 rounded-xl border border-gray-200 shadow-sm search-input">
+                        <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                        <button id="filterBtn" class="absolute right-3 top-2.5 bg-blue-600 text-white p-1.5 rounded-lg">
+                            <i class="fas fa-sliders-h"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex overflow-x-auto space-x-2 mt-3 pb-2">
+                        <button class="px-3 py-1.5 bg-blue-600 text-white rounded-full text-sm whitespace-nowrap">
+                            <i class="fas fa-university mr-1"></i> Makerere
+                        </button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm whitespace-nowrap">
+                            <i class="fas fa-university mr-1 text-blue-600"></i> Kyambogo
+                        </button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm whitespace-nowrap">
+                            <i class="fas fa-university mr-1 text-blue-600"></i> MUBS
+                        </button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm whitespace-nowrap">
+                            <i class="fas fa-university mr-1 text-blue-600"></i> MUST
+                        </button>
+                        <button class="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm whitespace-nowrap">
+                            <i class="fas fa-university mr-1 text-blue-600"></i> UCU
+                        </button>
+                    </div>
+                </section>
+
+                <section class="mt-4 px-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-lg font-semibold text-gray-800">Featured Hostels</h2>
+                        <a href="#" class="text-blue-600 text-sm font-medium">See all</a>
+                    </div>
+
+                    <div class="featured-swiper swiper-container">
+                        <div class="swiper-wrapper">
+                            <div class="featured-swiper-slide swiper-slide relative" style="background-image: url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')">
+                                <div class="absolute bottom-0 left-0 right-0 p-4 backdrop-blur bg-black bg-opacity-40 text-white rounded-b-xl">
+                                    <div class="flex justify-between items-end">
+                                        <div>
+                                            <h3 class="font-bold">University View Hostel</h3>
+                                            <p class="text-sm">5 min walk to Makerere</p>
+                                        </div>
+                                        <span class="price-tag px-2 py-1 rounded-lg font-bold">UGX 450K</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="featured-swiper-slide swiper-slide relative" style="background-image: url('https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')">
+                                <div class="absolute bottom-0 left-0 right-0 p-4 backdrop-blur bg-black bg-opacity-40 text-white rounded-b-xl">
+                                    <div class="flex justify-between items-end">
+                                        <div>
+                                            <h3 class="font-bold">Kikoni Comfort</h3>
+                                            <p class="text-sm">Near Makerere Gate</p>
+                                        </div>
+                                        <span class="price-tag px-2 py-1 rounded-lg font-bold">UGX 380K</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="featured-swiper-slide swiper-slide relative" style="background-image: url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')">
+                                <div class="absolute bottom-0 left-0 right-0 p-4 backdrop-blur bg-black bg-opacity-40 text-white rounded-b-xl">
+                                    <div class="flex justify-between items-end">
+                                        <div>
+                                            <h3 class="font-bold">Ntinda Student Suites</h3>
+                                            <p class="text-sm">Shuttle to Kyambogo</p>
+                                        </div>
+                                        <span class="price-tag px-2 py-1 rounded-lg font-bold">UGX 550K</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="swiper-pagination"></div>
+                    </div>
+                </section>
+
+                <section class="mt-6 px-4">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-3">Find by Preference</h2>
+                    <div class="grid grid-cols-4 gap-3">
+                        <button class="preference-btn flex flex-col items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100" data-preference="girls-only">
+                            <div class="feature-icon rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-female text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700">Girls Only</span>
+                        </button>
+                        <button class="preference-btn flex flex-col items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100" data-preference="boys-only">
+                            <div class="feature-icon rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-male text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700">Boys Only</span>
+                        </button>
+                        <button class="preference-btn flex flex-col items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100" data-preference="with-meals">
+                            <div class="feature-icon rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-utensils text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700">With Meals</span>
+                        </button>
+                        <button class="preference-btn flex flex-col items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100" data-preference="wifi">
+                            <div class="feature-icon rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-wifi text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700">WiFi</span>
+                        </button>
+                        <button class="preference-btn flex flex-col items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100" data-preference="water">
+                            <div class="feature-icon rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-water text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700">Water 24/7</span>
+                        </button>
+                        <button class="preference-btn flex flex-col items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100" data-preference="security">
+                            <div class="feature-icon rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-shield-alt text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700">Security</span>
+                        </button>
+                        <button class="preference-btn flex flex-col items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100" data-preference="budget">
+                            <div class="feature-icon rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-dollar-sign text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700">Budget</span>
+                        </button>
+                        <button class="preference-btn flex flex-col items-center p-3 bg-white rounded-xl shadow-sm border border-gray-100" data-preference="more-filters">
+                            <div class="feature-icon rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-filter text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-700">More Filters</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="mt-6 px-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-lg font-semibold text-gray-800">Near Makerere University</h2>
+                        <a href="#" class="text-blue-600 text-sm font-medium">See all</a>
+                    </div>
+<!-- University Hostel Section -->
+<section id="universityHostelsSection" class="mt-6 px-4 hidden">
+    <h2 id="universityTitle" class="text-lg font-semibold text-gray-800 mb-3"></h2>
+    <div id="universityHostelsList" class="space-y-4"></div>
+</section>
+                    <div class="space-y-4">
+                        <div class="hostel-card bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                            <div class="relative">
+                                <img src="https://images.unsplash.com/photo-1554469384-e58fac16e23a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80"
+                                     alt="Hostel" class="w-full h-40 object-cover">
+                                <div class="absolute top-2 right-2 bg-white px-2 py-1 rounded-full text-xs font-bold text-blue-600">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i> 4.8
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold text-gray-800">Kikoni Comfort Hostel</h3>
+                                        <p class="text-sm text-gray-500 flex items-center">
+                                            <i class="fas fa-map-marker-alt text-blue-500 mr-1"></i> 5 min walk to Makerere
+                                        </p>
+                                    </div>
+                                    <span class="font-bold text-blue-600">UGX 400K</span>
+                                </div>
+
+                                <div class="flex flex-wrap gap-1 mt-2">
+                                    <span class="amenity-badge px-2 py-1 rounded-full text-xs text-gray-700">
+                                        <i class="fas fa-wifi text-blue-500 mr-1"></i> WiFi
+                                    </span>
+                                    <span class="amenity-badge px-2 py-1 rounded-full text-xs text-gray-700">
+                                        <i class="fas fa-utensils text-blue-500 mr-1"></i> Meals
+                                    </span>
+                                    <span class="amenity-badge px-2 py-1 rounded-full text-xs text-gray-700">
+                                        <i class="fas fa-water text-blue-500 mr-1"></i> Water 24/7
+                                    </span>
+                                </div>
+
+                                <button class="w-full mt-3 bg-blue-600 text-white py-2 rounded-lg font-medium">
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="hostel-card bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                            <div class="relative">
+                                <img src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+                                     alt="Hostel" class="w-full h-40 object-cover">
+                                <div class="absolute top-2 right-2 bg-white px-2 py-1 rounded-full text-xs font-bold text-blue-600">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i> 4.5
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-bold text-gray-800">Makerere View Apartments</h3>
+                                        <p class="text-sm text-gray-500 flex items-center">
+                                            <i class="fas fa-map-marker-alt text-blue-500 mr-1"></i> 10 min walk to MUBS
+                                        </p>
+                                    </div>
+                                    <span class="font-bold text-blue-600">UGX 550K</span>
+                                </div>
+
+                                <div class="flex flex-wrap gap-1 mt-2">
+                                    <span class="amenity-badge px-2 py-1 rounded-full text-xs text-gray-700">
+                                        <i class="fas fa-wifi text-blue-500 mr-1"></i> WiFi
+                                    </span>
+                                    <span class="amenity-badge px-2 py-1 rounded-full text-xs text-gray-700">
+                                        <i class="fas fa-tv text-blue-500 mr-1"></i> DSTV
+                                    </span>
+                                    <span class="amenity-badge px-2 py-1 rounded-full text-xs text-gray-700">
+                                        <i class="fas fa-parking text-blue-500 mr-1"></i> Parking
+                                    </span>
+                                </div>
+
+                                <button class="w-full mt-3 bg-blue-600 text-white py-2 rounded-lg font-medium">
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mt-6 px-4 pb-4">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-3">Student Reviews</h2>
+                    <div class="bg-blue-50 rounded-xl p-4">
+                        <div class="testimonial-swiper swiper-container">
+                            <div class="swiper-wrapper">
+                                <div class="testimonial-swiper-slide swiper-slide">
+                                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                                        <div class="flex items-center mb-3">
+                                            <img src="https://randomuser.me/api/portraits/women/44.jpg"
+                                                 alt="Student" class="w-10 h-10 rounded-full mr-3">
+                                            <div>
+                                                <h4 class="font-medium">Sarah K.</h4>
+                                                <div class="flex">
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="text-sm text-gray-600">
+                                            "Found my perfect hostel through Campus Cribs! The app showed me options I never knew existed near MUBS. Very reliable!"
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="testimonial-swiper-slide swiper-slide">
+                                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                                        <div class="flex items-center mb-3">
+                                            <img src="https://randomuser.me/api/portraits/men/32.jpg"
+                                                 alt="Student" class="w-10 h-10 rounded-full mr-3">
+                                            <div>
+                                                <h4 class="font-medium">David M.</h4>
+                                                <div class="flex">
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="text-sm text-gray-600">
+                                            "As an international student, this app made finding accommodation so easy. The filters helped me find exactly what I needed."
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="testimonial-swiper-slide swiper-slide">
+                                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                                        <div class="flex items-center mb-3">
+                                            <img src="https://randomuser.me/api/portraits/women/68.jpg"
+                                                 alt="Student" class="w-10 h-10 rounded-full mr-3">
+                                            <div>
+                                                <h4 class="font-medium">Grace N.</h4>
+                                                <div class="flex">
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="text-sm text-gray-600">
+                                            "The verified listings saved me from scams. Found a safe girls-only hostel near Kyambogo with all amenities I needed."
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-pagination"></div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Profile Section (hidden by default) -->
+            <section id="profileSection" class="hidden">
+                <!-- Profile Header -->
+                <div class="profile-header text-white pt-6 pb-8 px-6">
+                    <div class="flex justify-between items-start mb-6">
+                        <button id="backButton" class="p-2 rounded-full bg-blue-500 bg-opacity-30">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <button class="p-2 rounded-full bg-blue-500 bg-opacity-30">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" 
+                                 alt="Profile" 
+                                 class="w-20 h-20 rounded-full border-4 border-white border-opacity-30">
+                            <div class="absolute -bottom-1 -right-1 bg-green-500 rounded-full w-5 h-5 border-2 border-white"></div>
+                        </div>
+                        
+                        <div>
+                            <h2 class="text-xl font-bold">Sarah Johnson</h2>
+                            <p class="text-blue-100">Makerere University</p>
+                            <p class="text-sm text-blue-100 opacity-80">Computer Science, Year 2</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile Stats -->
+                <div class="px-6 -mt-6">
+                    <div class="bg-white rounded-xl shadow-md p-4">
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600">12</div>
+                                <div class="text-xs text-gray-500">Saved Hostels</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600">3</div>
+                                <div class="text-xs text-gray-500">Bookings</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600">4.8</div>
+                                <div class="text-xs text-gray-500">Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile Completion -->
+                <div class="px-6 mt-4">
+                    <div class="bg-white rounded-xl shadow-md p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium text-gray-700">Profile Completion</h3>
+                            <span class="text-sm font-medium text-blue-600">75%</span>
+                        </div>
+                        
+                        <div class="relative pt-1">
+                            <div class="flex items-center justify-between">
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p class="text-xs text-gray-500 mt-2">Complete your profile to get better recommendations</p>
+                        <button class="w-full mt-3 bg-blue-100 text-blue-600 py-2 rounded-lg font-medium text-sm">
+                            Complete Profile
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="flex border-b px-6 mt-6">
+                    <button id="hostelsTab" class="tab-active flex-1 py-2 text-center font-medium">My Hostels</button>
+                    <button id="reviewsTab" class="flex-1 py-2 text-center text-gray-500">Reviews</button>
+                    <button id="settingsTab" class="flex-1 py-2 text-center text-gray-500">Settings</button>
+                </div>
+                
+                <!-- Hostels Content -->
+                <div id="hostelsContent" class="px-4 py-4">
+                    <h3 class="font-medium text-gray-700 mb-3">Recently Viewed</h3>
+                    
+                    <div class="space-y-3">
+                        <!-- Hostel Card 1 -->
+                        <div class="flex bg-white rounded-lg shadow-sm p-3">
+                            <img src="https://images.unsplash.com/photo-1554469384-e58fac16e23a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80" 
+                                 alt="Hostel" 
+                                 class="w-20 h-20 rounded-lg object-cover">
+                            <div class="ml-3 flex-1">
+                                <div class="flex justify-between">
+                                    <h4 class="font-medium">Kikoni Comfort</h4>
+                                    <div class="flex items-center text-xs">
+                                        <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                        <span>4.8</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500 mb-1">5 min walk to Makerere</p>
+                                <div class="flex flex-wrap gap-1">
+                                    <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">WiFi</span>
+                                    <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Meals</span>
+                                </div>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="font-bold text-blue-600 text-sm">UGX 400K</span>
+                                    <button class="text-xs bg-blue-600 text-white px-3 py-1 rounded-full">
+                                        View
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hostel Card 2 -->
+                        <div class="flex bg-white rounded-lg shadow-sm p-3">
+                            <img src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 alt="Hostel" 
+                                 class="w-20 h-20 rounded-lg object-cover">
+                            <div class="ml-3 flex-1">
+                                <div class="flex justify-between">
+                                    <h4 class="font-medium">Makerere View</h4>
+                                    <div class="flex items-center text-xs">
+                                        <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                        <span>4.5</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500 mb-1">10 min walk to MUBS</p>
+                                <div class="flex flex-wrap gap-1">
+                                    <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">WiFi</span>
+                                    <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Parking</span>
+                                </div>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="font-bold text-blue-600 text-sm">UGX 550K</span>
+                                    <button class="text-xs bg-blue-600 text-white px-3 py-1 rounded-full">
+                                        View
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 class="font-medium text-gray-700 mt-6 mb-3">Saved Hostels</h3>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Saved Hostel 1 -->
+                        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 alt="Hostel" 
+                                 class="w-full h-20 object-cover">
+                            <div class="p-2">
+                                <h4 class="font-medium text-sm">Ntinda Suites</h4>
+                                <div class="flex justify-between items-center mt-1">
+                                    <span class="text-xs font-bold text-blue-600">UGX 480K</span>
+                                    <button class="text-blue-600">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Saved Hostel 2 -->
+                        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 alt="Hostel" 
+                                 class="w-full h-20 object-cover">
+                            <div class="p-2">
+                                <h4 class="font-medium text-sm">University View</h4>
+                                <div class="flex justify-between items-center mt-1">
+                                    <span class="text-xs font-bold text-blue-600">UGX 450K</span>
+                                    <button class="text-blue-600">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reviews Content (hidden by default) -->
+                <div id="reviewsContent" class="hidden px-4 py-4">
+                    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+                        <div class="flex items-center mb-3">
+                            <div class="mr-3">
+                                <div class="text-3xl font-bold text-blue-600">4.8</div>
+                                <div class="flex">
+                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                    <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center mb-1">
+                                    <span class="text-xs font-medium mr-2">5 stars</span>
+                                    <div class="flex-1 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-yellow-400 h-1.5 rounded-full" style="width: 80%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium ml-2">8</span>
+                                </div>
+                                <div class="flex items-center mb-1">
+                                    <span class="text-xs font-medium mr-2">4 stars</span>
+                                    <div class="flex-1 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-yellow-400 h-1.5 rounded-full" style="width: 15%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium ml-2">2</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-xs font-medium mr-2">3 stars</span>
+                                    <div class="flex-1 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-yellow-400 h-1.5 rounded-full" style="width: 5%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium ml-2">1</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium text-sm">
+                            Write a Review
+                        </button>
+                    </div>
+                    
+                    <h3 class="font-medium text-gray-700 mb-3">My Reviews</h3>
+                    
+                    <div class="space-y-3">
+                        <!-- Review 1 -->
+                        <div class="bg-white rounded-xl shadow-sm p-4">
+                            <div class="flex items-center mb-2">
+                                <img src="https://images.unsplash.com/photo-1554469384-e58fac16e23a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80" 
+                                     alt="Hostel" 
+                                     class="w-12 h-12 rounded-lg object-cover mr-3">
+                                <div>
+                                    <h4 class="font-medium">Kikoni Comfort</h4>
+                                    <div class="flex items-center">
+                                        <div class="flex mr-2">
+                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        </div>
+                                        <span class="text-xs text-gray-500">2 weeks ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600">
+                                "This hostel has been amazing! The WiFi is super fast and the meals are delicious. The location is perfect for Makerere students."
+                            </p>
+                        </div>
+                        
+                        <!-- Review 2 -->
+                        <div class="bg-white rounded-xl shadow-sm p-4">
+                            <div class="flex items-center mb-2">
+                                <img src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                     alt="Hostel" 
+                                     class="w-12 h-12 rounded-lg object-cover mr-3">
+                                <div>
+                                    <h4 class="font-medium">Makerere View</h4>
+                                    <div class="flex items-center">
+                                        <div class="flex mr-2">
+                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                            <i class="fas fa-star-half-alt text-yellow-400 text-xs"></i>
+                                        </div>
+                                        <span class="text-xs text-gray-500">1 month ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600">
+                                "Great place overall, but the water pressure could be better. The security is excellent and the staff are very friendly."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Settings Content (hidden by default) -->
+                <div id="settingsContent" class="hidden px-4 py-4">
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-4">
+                        <div class="p-4 border-b">
+                            <h3 class="font-medium text-gray-700">Account Settings</h3>
+                        </div>
+                        <div class="divide-y">
+                            <a href="#" class="flex items-center justify-between p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-user text-blue-600"></i>
+                                    </div>
+                                    <span>Personal Information</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </a>
+                            <a href="#" class="flex items-center justify-between p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-lock text-blue-600"></i>
+                                    </div>
+                                    <span>Password & Security</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </a>
+                            <a href="#" class="flex items-center justify-between p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-bell text-blue-600"></i>
+                                    </div>
+                                    <span>Notifications</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-4">
+                        <div class="p-4 border-b">
+                            <h3 class="font-medium text-gray-700">Preferences</h3>
+                        </div>
+                        <div class="divide-y">
+                            <div class="flex items-center justify-between p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-moon text-blue-600"></i>
+                                    </div>
+                                    <span>Dark Mode</span>
+                                </div>
+                                <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                    <input type="checkbox" id="toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                    <label for="toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                                </div>
+                            </div>
+                            <a href="#" class="flex items-center justify-between p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-language text-blue-600"></i>
+                                    </div>
+                                    <span>Language</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-sm text-gray-500 mr-2">English</span>
+                                    <i class="fas fa-chevron-right text-gray-400"></i>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                        <div class="p-4 border-b">
+                            <h3 class="font-medium text-gray-700">Support</h3>
+                        </div>
+                        <div class="divide-y">
+                            <a href="#" class="flex items-center justify-between p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-question-circle text-blue-600"></i>
+                                    </div>
+                                    <span>Help Center</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </a>
+                            <a href="#" class="flex items-center justify-between p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-envelope text-blue-600"></i>
+                                    </div>
+                                    <span>Contact Us</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </a>
+                            <a href="#" class="flex items-center justify-between p-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-info-circle text-blue-600"></i>
+                                    </div>
+                                    <span>About</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full mt-6 bg-red-50 text-red-600 py-3 rounded-lg font-medium">
+                        Log Out
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav flex justify-around items-center py-3">
+            <a href="#" class="nav-link flex flex-col items-center text-blue-600 active" data-section="home">
+                <i class="fas fa-home text-xl"></i>
+                <span class="text-xs mt-1">Home</span>
+            </a>
+            <a href="#" class="nav-link flex flex-col items-center text-gray-500" data-section="search">
+                <i class="fas fa-search text-xl"></i>
+                <span class="text-xs mt-1">Search</span>
+            </a>
+            <a href="#" class="nav-link flex flex-col items-center text-gray-500" data-section="saved">
+                <i class="fas fa-heart text-xl"></i>
+                <span class="text-xs mt-1">Saved</span>
+            </a>
+            <a href="#" class="nav-link flex flex-col items-center text-gray-500" data-section="messages">
+                <i class="fas fa-comment-dots text-xl"></i>
+                <span class="text-xs mt-1">Messages</span>
+            </a>
+            <a href="#" class="nav-link flex flex-col items-center text-gray-500" data-section="profile">
+                <i class="fas fa-user text-xl"></i>
+                <span class="text-xs mt-1">Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Preference Modal -->
+    <div class="preference-modal" id="preferenceModal">
+        <div class="preference-content" id="preferenceContent">
+            <div class="preference-header">
+                <div class="preference-title">
+                    <div class="preference-title-icon" id="preferenceIcon">
+                        <i class="fas text-blue-600" id="preferenceIconInner"></i>
+                    </div>
+                    <h2 class="text-lg font-bold" id="preferenceTitle">Preference</h2>
+                </div>
+                <button id="closePreferenceBtn">
+                    <i class="fas fa-times text-xl text-gray-500"></i>
+                </button>
+            </div>
+            <div class="preference-hostels">
+                <p class="preference-hostel-count" id="hostelCount">12 hostels found</p>
+                <div class="space-y-4" id="preferenceHostelsList">
+                    <!-- Hostels will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+  <!-- Filter Modal -->
+<div class="preference-modal" id="filterModal">
+    <div class="preference-content" id="filterContent">
+        <div class="preference-header">
+            <h2 class="text-lg font-bold">Advanced Filters</h2>
+            <button id="closeFilterBtn">
+                <i class="fas fa-times text-xl text-gray-500"></i>
+            </button>
+        </div>
+        <div class="p-4 max-h-[70vh] overflow-y-auto">
+            <!-- Preferences will be injected here -->
+            <div id="filterOptions" class="space-y-3"></div>
+        </div>
+    </div>
+</div>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script>
+        const hostelData = {
+    'girls-only': {
+        title: "Girls Only Hostels",
+        icon: "fa-female",
+        hostels: [
+            {
+                name: "Sister's Comfort Hostel",
+                image: "https://images.unsplash.com/photo-1554469384-e58fac16e23a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1374&q=80",
+                price: "UGX 450K",
+                location: "5 min walk to Makerere",
+                rating: 4.7,
+                amenities: ["WiFi", "Water 24/7", "Security", "Laundry"]
+            },
+            {
+                name: "Queen's Residence",
+                image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                price: "UGX 380K",
+                location: "Near Kyambogo",
+                rating: 4.5,
+                amenities: ["WiFi", "Meals", "Security", "Study Room"]
+            },
+            {
+                name: "Ladies Paradise",
+                image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                price: "UGX 520K",
+                location: "10 min to UCU",
+                rating: 4.8,
+                amenities: ["WiFi", "Water 24/7", "Gym", "CCTV"]
+            }
+        ]
+    },
+    'boys-only': {
+        title: "Boys Only Hostels",
+        icon: "fa-male",
+        hostels: [
+            {
+                name: "Gentlemen's Quarters",
+                image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                price: "UGX 400K",
+                location: "Near Makerere",
+                rating: 4.3,
+                amenities: ["WiFi", "Games Room", "Security"]
+            },
+            {
+                name: "Brothers Lodge",
+                image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                price: "UGX 350K",
+                location: "5 min to MUBS",
+                rating: 4.2,
+                amenities: ["WiFi", "DSTV", "Parking"]
+            }
+        ]
+    },
+    'with-meals': {
+        title: "Hostels With Meals",
+        icon: "fa-utensils",
+        hostels: [
+            {
+                name: "Meal Plan Hostel",
+                image: "https://images.unsplash.com/photo-1554469384-e58fac16e23a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1374&q=80",
+                price: "UGX 550K",
+                location: "Near Makerere",
+                rating: 4.6,
+                amenities: ["3 meals/day", "WiFi", "Water 24/7"]
+            },
+            {
+                name: "Campus Kitchen",
+                image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                price: "UGX 480K",
+                location: "Near Kyambogo",
+                rating: 4.4,
+                amenities: ["Breakfast & Dinner", "WiFi", "Study Room"]
+            },
+            {
+                name: "Food Haven",
+                image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                price: "UGX 600K",
+                location: "Near UCU",
+                rating: 4.8,
+                amenities: ["Buffet meals", "WiFi", "Gym"]
+            }
+        ]
+    },
+    'wifi': {
+        title: "Hostels With WiFi",
+        icon: "fa-wifi",
+        hostels: [
+            {
+                name: "Tech Hub Hostel",
+                image: "https://images.unsplash.com/photo-1554469384-e58fac16e23a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1374&q=80",
+                price: "UGX 500K",
+                location: "Near Makerere",
+                rating: 4.7,
+                amenities: ["High-speed WiFi", "Study Room", "24/7 Security"]
+            },
+            {
+                name: "Connect Hostel",
+                image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                price: "UGX 450K",
+                location: "Near MUBS",
+                rating: 4.5,
+                amenities: ["Unlimited WiFi", "DSTV", "Cafeteria"]
+            }
+        ]
+    },
+    'water': {
+        title: "Hostels With 24/7 Water",
+        icon: "fa-water",
+        hostels: [
+            {
+                name: "Aqua View Hostel",
+                image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                price: "UGX 420K",
+                location: "Near Makerere",
+                rating: 4.6,
+                amenities: ["24/7 Water", "WiFi", "Laundry"]
+            },
+            {
+                name: "Waterfront Hostel",
+                image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                price: "UGX 380K",
+                location: "Near Kyambogo",
+                rating: 4.3,
+                amenities: ["24/7 Water", "Security", "Parking"]
+            }
+        ]
+    },
+    'security': {
+        title: "Secure Hostels",
+        icon: "fa-shield-alt",
+        hostels: [
+            {
+                name: "Safe Haven Hostel",
+                image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                price: "UGX 480K",
+                location: "Near Makerere",
+                rating: 4.8,
+                amenities: ["24/7 Security", "CCTV", "Alarm System"]
+            },
+            {
+                name: "Guardian Hostel",
+                image: "https://images.unsplash.com/photo-1554469384-e58fac16e23a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1374&q=80",
+                price: "UGX 520K",
+                location: "Near UCU",
+                rating: 4.7,
+                amenities: ["Armed Guards", "Biometric Access", "Fire Safety"]
+            }
+        ]
+    },
+    'budget': {
+        title: "Budget Hostels",
+        icon: "fa-dollar-sign",
+        hostels: [
+            {
+                name: "Economy Hostel",
+                image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                price: "UGX 300K",
+                location: "Near Makerere",
+                rating: 4.0,
+                amenities: ["Basic Amenities", "Shared Rooms", "Common Kitchen"]
+            },
+            {
+                name: "Student Budget",
+                image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+                price: "UGX 280K",
+                location: "Near Kyambogo",
+                rating: 3.9,
+                amenities: ["Shared Bathrooms", "Common Area", "Basic Security"]
+            }
+        ]
+    }
+};
+
+// Initialize Swiper carousels for featured hostels and testimonials
+const initSwipers = () => {
+    if (typeof Swiper === 'undefined') {
+        console.error('Swiper library not loaded');
+        return;
+    }
+    new Swiper('.featured-swiper', {
+        loop: true,
+        pagination: { el: '.featured-swiper + .swiper-pagination', clickable: true },
+        autoplay: { delay: 3000, disableOnInteraction: false }
+    });
+    new Swiper('.testimonial-swiper', {
+        loop: true,
+        pagination: { el: '.testimonial-swiper + .swiper-pagination', clickable: true },
+        autoplay: { delay: 4000, disableOnInteraction: false }
+    });
+};
+
+// Handle university filter buttons
+// Handle university filter buttons
+const handleUniversityButtons = () => {
+    const buttons = document.querySelectorAll('.flex.overflow-x-auto.space-x-2 button');
+    if (!buttons.length) {
+        console.warn('No university buttons found');
+        return;
+    }
+
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Reset all buttons
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('bg-white', 'border', 'border-gray-200');
+                const icon = btn.querySelector('i');
+                if (icon) icon.classList.replace('text-white', 'text-blue-600');
+            });
+
+            // Highlight active button
+            button.classList.add('bg-blue-600', 'text-white');
+            button.classList.remove('bg-white', 'border', 'border-gray-200');
+            const icon = button.querySelector('i');
+            if (icon) icon.classList.replace('text-blue-600', 'text-white');
+
+            // Get university name from button text
+            const universityName = button.textContent.trim().replace(/^.*?(?=University|$)/, '').trim();
+
+            // Show hostels for selected university
+            showUniversityHostels(universityName);
+        });
+    });
+};
+// Create a hostel card HTML string
+const createHostelCard = (hostel) => {
+    const amenityIcons = {
+        'WiFi': 'fa-wifi',
+        'Water': 'fa-water',
+        'Security': 'fa-shield-alt',
+        'DSTV': 'fa-tv',
+        'Parking': 'fa-parking',
+        'Gym': 'fa-dumbbell',
+        'Laundry': 'fa-tshirt',
+        'Study Room': 'fa-book',
+        'meals': 'fa-utensils'
+    };
+
+    return `
+        <div class="hostel-card bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+            <div class="relative">
+                <img src="${hostel.image}" alt="Hostel" class="w-full h-40 object-cover">
+                <div class="absolute top-2 right-2 bg-white px-2 py-1 rounded-full text-xs font-bold text-blue-600">
+                    <i class="fas fa-star text-yellow-400 mr-1"></i> ${hostel.rating}
+                </div>
+            </div>
+            <div class="p-3">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-bold text-gray-800">${hostel.name}</h3>
+                        <p class="text-sm text-gray-500 flex items-center">
+                            <i class="fas fa-map-marker-alt text-blue-500 mr-1"></i> ${hostel.location}
+                        </p>
+                    </div>
+                    <span class="font-bold text-blue-600">${hostel.price}</span>
+                </div>
+                <div class="flex flex-wrap gap-1 mt-2">
+                    ${hostel.amenities.map(amenity => `
+                        <span class="amenity-badge px-2 py-1 rounded-full text-xs text-gray-700">
+                            ${Object.keys(amenityIcons).some(key => amenity.includes(key)) ?
+                                `<i class="fas ${amenityIcons[Object.keys(amenityIcons).find(key => amenity.includes(key))]} text-blue-500 mr-1"></i>` : ''}
+                            ${amenity}
+                        </span>
+                    `).join('')}
+                </div>
+                <button class="w-full mt-3 bg-blue-600 text-white py-2 rounded-lg font-medium">
+                    View Details
+                </button>
+            </div>
+        </div>
+    `;
+};
+
+// Show preference modal with hostel data
+const showPreferenceModal = (preference) => {
+    const modal = document.getElementById('preferenceModal');
+    const content = document.getElementById('preferenceContent');
+    const title = document.getElementById('preferenceTitle');
+    const icon = document.getElementById('preferenceIconInner');
+    const count = document.getElementById('hostelCount');
+    const list = document.getElementById('preferenceHostelsList');
+
+    if (!modal || !content || !title || !icon || !count || !list) {
+        console.error('Preference modal elements not found');
+        return;
+    }
+
+    const data = hostelData[preference];
+    if (!data) {
+        console.error(`No data found for preference: ${preference}`);
+        return;
+    }
+
+    title.textContent = data.title;
+    icon.className = `fas ${data.icon} text-blue-600`;
+    count.textContent = `${data.hostels.length} hostels found`;
+    list.innerHTML = data.hostels.map(createHostelCard).join('');
+
+    modal.style.display = 'flex';
+    setTimeout(() => content.classList.add('active'), 10);
+
+    list.querySelectorAll('.hostel-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                const hostelName = card.querySelector('h3')?.textContent || 'Unknown';
+                console.log(`Viewing details for: ${hostelName}`);
+            }
+        });
+    });
+};
+
+// Hide preference modal
+const hidePreferenceModal = () => {
+    const modal = document.getElementById('preferenceModal');
+    const content = document.getElementById('preferenceContent');
+    if (!modal || !content) return;
+    content.classList.remove('active');
+    setTimeout(() => modal.style.display = 'none', 300);
+};
+
+// Handle preference buttons and modal interactions
+const handlePreferenceButtons = () => {
+    const preferenceButtons = document.querySelectorAll('.preference-btn');
+    if (!preferenceButtons.length) {
+        console.warn('No preference buttons found');
+        return;
+    }
+    preferenceButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const preference = btn.dataset.preference;
+            if (preference === 'more-filters') {
+                const filterBtn = document.getElementById('filterBtn');
+                if (filterBtn) filterBtn.click();
+            } else {
+                showPreferenceModal(preference);
+            }
+        });
+    });
+
+    const closeBtn = document.getElementById('closePreferenceBtn');
+    const modal = document.getElementById('preferenceModal');
+    if (closeBtn) closeBtn.addEventListener('click', hidePreferenceModal);
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) hidePreferenceModal();
+        });
+    }
+};
+
+// Handle filter button click
+// Show filter modal with all available preferences
+const showFilterModal = () => {
+    const modal = document.getElementById('filterModal');
+    const content = document.getElementById('filterContent');
+    const container = document.getElementById('filterOptions');
+
+    if (!modal || !content || !container) return;
+
+    // Generate preference buttons from hostelData keys
+    const preferences = Object.keys(hostelData);
+    container.innerHTML = preferences.map(prefKey => {
+        const pref = hostelData[prefKey];
+        return `
+            <button data-preference="${prefKey}" class="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border border-gray-200 w-full text-left hover:bg-blue-50 transition">
+                <div class="feature-icon rounded-full flex items-center justify-center">
+                    <i class="fas ${pref.icon} text-blue-600"></i>
+                </div>
+                <span class="font-medium">${pref.title}</span>
+            </button>
+        `;
+    }).join('');
+
+    // Show modal
+    modal.style.display = 'flex';
+    setTimeout(() => content.classList.add('active'), 10);
+
+    // Attach click handler to each preference
+    container.querySelectorAll('button[data-preference]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const preference = btn.dataset.preference;
+            showPreferenceModal(preference); // Reuse existing modal
+            hideFilterModal(); // Close filter modal after selection
+        });
+    });
+};
+
+// Hide filter modal
+const hideFilterModal = () => {
+    const modal = document.getElementById('filterModal');
+    const content = document.getElementById('filterContent');
+    if (!modal || !content) return;
+    content.classList.remove('active');
+    setTimeout(() => modal.style.display = 'none', 300);
+};
+
+// Replace handleFilterButton() with this:
+const handleFilterButton = () => {
+    const filterBtn = document.getElementById('filterBtn');
+    const closeBtn = document.getElementById('closeFilterBtn');
+    const modal = document.getElementById('filterModal');
+
+    if (!filterBtn) {
+        console.warn('Filter button not found');
+        return;
+    }
+
+    filterBtn.addEventListener('click', showFilterModal);
+
+    if (closeBtn) closeBtn.addEventListener('click', hideFilterModal);
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) hideFilterModal();
+        });
+    }
+};
+
+// Handle hostel card clicks
+const handleHostelCards = () => {
+    const cards = document.querySelectorAll('.hostel-card');
+    if (!cards.length) {
+        console.warn('No hostel cards found');
+        return;
+    }
+    cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                const hostelName = card.querySelector('h3')?.textContent || 'Unknown';
+                console.log(`Viewing details for: ${hostelName}`);
+            }
+        });
+    });
+};
+
+// Handle navigation and section toggling
+const handleNavigation = () => {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const profileSection = document.getElementById('profileSection');
+    const mainContentSection = document.getElementById('mainContentSection');
+    const profileBtn = document.getElementById('profileBtn');
+    const backBtn = document.getElementById('backButton');
+
+    if (!navLinks.length || !profileSection || !mainContentSection || !profileBtn || !backBtn) {
+        console.warn('Navigation elements missing');
+        return;
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            navLinks.forEach(nav => {
+                nav.classList.remove('active', 'text-blue-600');
+                nav.classList.add('text-gray-500');
+            });
+            link.classList.add('active', 'text-blue-600');
+            link.classList.remove('text-gray-500');
+
+            const section = link.dataset.section;
+            console.log(`Navigating to: ${section}`);
+            profileSection.classList.toggle('hidden', section !== 'profile');
+            mainContentSection.classList.toggle('hidden', section === 'profile');
+        });
+    });
+
+    profileBtn.addEventListener('click', () => {
+        profileSection.classList.remove('hidden');
+        mainContentSection.classList.add('hidden');
+        navLinks.forEach(nav => {
+            nav.classList.remove('active', 'text-blue-600');
+            nav.classList.add('text-gray-500');
+        });
+        const profileNav = document.querySelector('.nav-link[data-section="profile"]');
+        if (profileNav) {
+            profileNav.classList.add('active', 'text-blue-600');
+            profileNav.classList.remove('text-gray-500');
+        }
+    });
+
+    backBtn.addEventListener('click', () => {
+        profileSection.classList.add('hidden');
+        mainContentSection.classList.remove('hidden');
+        navLinks.forEach(nav => {
+            nav.classList.remove('active', 'text-blue-600');
+            nav.classList.add('text-gray-500');
+        });
+        const homeNav = document.querySelector('.nav-link[data-section="home"]');
+        if (homeNav) {
+            homeNav.classList.add('active', 'text-blue-600');
+            homeNav.classList.remove('text-gray-500');
+        }
+    });
+};
+
+// Handle notifications button
+const handleNotifications = () => {
+    const notificationsBtn = document.getElementById('notificationsBtn');
+    if (!notificationsBtn) {
+        console.warn('Notifications button not found');
+        return;
+    }
+    notificationsBtn.addEventListener('click', () => {
+        console.log('Opening notifications...');
+        alert('Notifications panel would open here.');
+    });
+};
+
+// Handle profile tabs
+const handleProfileTabs = () => {
+    const tabs = document.querySelectorAll('#profileSection button[id$="Tab"]');
+    const contents = document.querySelectorAll('#profileSection div[id$="Content"]');
+    if (!tabs.length || !contents.length) {
+        console.warn('Profile tabs or contents not found');
+        return;
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => {
+                t.classList.remove('tab-active', 'text-blue-600');
+                t.classList.add('text-gray-500');
+            });
+            contents.forEach(c => c.classList.add('hidden'));
+
+            tab.classList.add('tab-active', 'text-blue-600');
+            tab.classList.remove('text-gray-500');
+            const content = document.getElementById(tab.id.replace('Tab', 'Content'));
+            if (content) content.classList.remove('hidden');
+        });
+    });
+};
+
+// Handle dark mode toggle
+const handleDarkMode = () => {
+    const toggle = document.getElementById('toggle');
+    if (!toggle) {
+        console.warn('Dark mode toggle not found');
+        return;
+    }
+    toggle.addEventListener('change', () => {
+        document.body.classList.toggle('dark');
+        console.log(`Dark mode ${toggle.checked ? 'enabled' : 'disabled'}`);
+    });
+};
+
+    // Generate fake hostel data for universities
+const generateUniversityHostels = (universityName) => {
+    const sampleHostels = {
+        'Makerere': [
+            {
+                name: "Kikoni Comfort Hostel",
+                image: "https://images.unsplash.com/photo-1554469384-e58fac16e23a?auto=format&fit=crop&w=1374&q=80 ",
+                price: "UGX 400K",
+                location: "5 min walk to Makerere",
+                rating: 4.8,
+                amenities: ["WiFi", "Meals", "Security", "Water 24/7"]
+            },
+            {
+                name: "Ntinda Student Suites",
+                image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1470&q=80 ",
+                price: "UGX 480K",
+                location: "10 min from Makerere",
+                rating: 4.6,
+                amenities: ["Gym", "Parking", "WiFi", "Laundry"]
+            }
+        ],
+        'Kyambogo': [
+            {
+                name: "Queen’s Residence",
+                image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1470&q=80 ",
+                price: "UGX 380K",
+                location: "Near Kyambogo",
+                rating: 4.5,
+                amenities: ["WiFi", "Meals", "Study Room", "Security"]
+            },
+            {
+                name: "Kyambogo View Lodge",
+                image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?auto=format&fit=crop&w=1470&q=80 ",
+                price: "UGX 420K",
+                location: "Close to Campus",
+                rating: 4.3,
+                amenities: ["WiFi", "DSTV", "Parking"]
+            }
+        ],
+        'MUBS': [
+            {
+                name: "Brothers Lodge",
+                image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?auto=format&fit=crop&w=1470&q=80 ",
+                price: "UGX 350K",
+                location: "5 min to MUBS",
+                rating: 4.2,
+                amenities: ["WiFi", "DSTV", "Parking"]
+            },
+            {
+                name: "MUBS Student Inn",
+                image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1470&q=80 ",
+                price: "UGX 400K",
+                location: "Right next to MUBS",
+                rating: 4.4,
+                amenities: ["Security", "WiFi", "Common Kitchen"]
+            }
+        ],
+        'MUST': [
+            {
+                name: "MUST Campus Hostel",
+                image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1470&q=80 ",
+                price: "UGX 450K",
+                location: "On Campus",
+                rating: 4.7,
+                amenities: ["WiFi", "Security", "Cafeteria"]
+            }
+        ],
+        'UCU': [
+            {
+                name: "UCU Riverside Hostel",
+                image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1470&q=80 ",
+                price: "UGX 500K",
+                location: "Near UCU Campus",
+                rating: 4.6,
+                amenities: ["View of Lake Victoria", "WiFi", "Gym"]
+            }
+        ]
+    };
+    return sampleHostels[universityName] || [];
+};
+      // Show hostels for selected university
+const showUniversityHostels = (universityName) => {
+    const hostels = generateUniversityHostels(universityName);
+    const section = document.getElementById('universityHostelsSection');
+    const title = document.getElementById('universityTitle');
+    const list = document.getElementById('universityHostelsList');
+
+    if (!section || !title || !list) return;
+
+    // Clear previous content
+    list.innerHTML = '';
+    title.textContent = `${universityName} Hostels`;
+
+    // Show section
+    section.classList.remove('hidden');
+
+    // Scroll to top of section
+    section.scrollIntoView({ behavior: 'smooth' });
+
+    // Render each hostel
+    hostels.forEach(hostel => {
+        const cardHTML = createHostelCard(hostel);
+        list.insertAdjacentHTML('beforeend', cardHTML);
+    });
+};
+// Initialize all functionality
+const init = () => {
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            initSwipers();
+            handleUniversityButtons();
+            handlePreferenceButtons();
+            handleFilterButton();
+            handleHostelCards();
+            handleNavigation();
+            handleNotifications();
+            handleProfileTabs();
+            handleDarkMode();
+            console.log('Campus Cribs app initialized successfully');
+        } catch (error) {
+            console.error('Initialization error:', error);
+        }
+    });
+};
+
+// Start the application
+init();
+  </script>
